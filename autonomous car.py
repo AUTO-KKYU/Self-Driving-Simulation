@@ -23,11 +23,16 @@ class autonomouscar:
         self.angle = 0
         self.center = [self.pos[0] + 50, self.pos[1] + 50]
         self.radars = []
+        self.radar_lines = []  # 레이더 선들을 저장할 리스트
         self.is_alive = True
         self.time_spent = 0
+
     
     def position(self, display):
         display.blit(self.rotate_surface, self.pos)
+        if self.radar_lines:  # 레이더 선들이 비어 있지 않은지 확인
+            for line in self.radar_lines:
+                pygame.draw.line(display, (0, 255, 0), line[0], line[1], 1)  # 초록색 선을 그림
     
     def avoid_collision(self, track):
         self.is_alive = True
@@ -48,6 +53,8 @@ class autonomouscar:
         
         distance = int(math.sqrt(math.pow(x - self.center[0], 2) + math.pow(y - self.center[1], 2)))
         self.radars.append([(x, y), distance])
+        self.radar_lines.append((self.center, (x, y)))  # 선의 시작점과 끝점을 저장
+
     
     def positionupdate(self, map):
         self.speed = 10
@@ -72,6 +79,7 @@ class autonomouscar:
         
         self.avoid_collision(map)
         self.radars.clear()
+        self.radar_lines.clear()  # 이전 프레임의 레이더 선 데이터를 지움
         for j in range(-90, 120, 45):
             self.radardetection(j, map)
     
@@ -95,18 +103,37 @@ def run_autonomouscar(genomes, configuration):
     neuralnetworks = list()
     cars = list()
     frames = []
-
+    frame_rate = 60
+    clock = pygame.time.Clock()
+    
     for i, j in genomes:
         neuralnetwork = neat.nn.FeedForwardNetwork.create(j, configuration)
         neuralnetworks.append(neuralnetwork)
         j.fitness = 0
         cars.append(autonomouscar())
     
+    recording = False
+    recording_name = "virtual_simulation.mp4"
+    writer = None
+    
     while True:
-        for x in pygame.event.get():
-            if x.type == pygame.QUIT:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit(0)
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    recording = not recording
+                    if recording:
+                        frames = []
+                        print("Recording started.")
+                    else:
+                        print("Recording stopped.")
+                        imageio.mimsave(recording_name, frames, fps=frame_rate)
+                        writer = imageio.get_writer(recording_name, fps=frame_rate)
+        
+        if recording:
+            frames.append(pygame.surfarray.array3d(display))
         
         for k, car in enumerate(cars):
             result = neuralnetworks[k].activate(car.radar_data())
@@ -132,6 +159,10 @@ def run_autonomouscar(genomes, configuration):
                 y.position(display)
         
         pygame.display.flip()
+        clock.tick(frame_rate)
+
+    if writer:
+        writer.close()
         
 def simulation():
     configurationfile = "C:\\Users\\dknjy\\.anaconda\\autonomous\\Self-Driving Car\\neat_config.txt"
