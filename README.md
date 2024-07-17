@@ -59,5 +59,24 @@ python3 autonomous car.py
 | `simulation`               | NEAT 설정을 사용하여 자율 주행 자동차 시뮬레이션 실행 및 최적화된 자동차 반환                  |
 
 ### Simulation Video 
-https://github.com/user-attachments/assets/183c7e31-f0a4-4f94-89de-9d155e52a214
+
+## 이미지 예시
+
+<table>
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/dd9f92d8-2adf-4d58-8318-7911e5c39351" width="480" height="320">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/5c9f9e94-ef5f-45c9-a047-12de40bad777" width="480" height="320">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">Self-Driving Simulation</td>
+    <td align="center">Radar Visualization -> Until Reaching an Obstacle</td>
+  </tr>
+</table>
+
+
+
 
